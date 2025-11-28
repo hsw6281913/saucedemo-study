@@ -49,16 +49,40 @@ test.describe('로그아웃/장바구니 추가 기능 묶기',() => {
         await expect(page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
         console.log ('>> 장바구니 담기 성공');
     });
-    // 장바구니 숫자 1 확인
-    test ('장바구니 숫자 1 업데이트 확인', async ({page}) => {
+    
+    test ('장바구니 상품 업데이트 확인', async ({page}) => {
+        //장바구니 상품리스트 상품명/가격 저장
+        const inventoryfirstname = await page.locator('.inventory_item_name').first().innerText();
+        const inventoryfirstprice = await page.locator('.inventory_item_price').first().innerText();
+        console.log('상품명:',inventoryfirstname);
+        console.log('상품가격:',inventoryfirstprice);
+
         //장바구니 담기
         await page.getByRole('button', { name: 'Add to cart'}).first().click();
         await expect(page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
 
-        //장바구니 숫자 1 업데이트
+        //장바구니 숫자 1 업데이트 확인
         const cartBadge =  page.locator('.shopping_cart_badge');
         await expect(cartBadge).toHaveText('1');
         console.log('>> 장바구니 숫자 1 확인');
+
+        //장바구니 페이지 이동
+        const cartlink = page.locator('.shopping_cart_link');
+        await cartlink.click();
+        await expect(page).toHaveURL('https://www.saucedemo.com/cart.html');
+        console.log('>>> 장바구니 페이지 이동 확인')
+        
+        //장바구니 담은 상품명/가격 저장
+        const cartfirstname = await page.locator('.inventory_item_name').first().innerText();
+        const cartfirstprice = await page.locator('.inventory_item_price').first().innerText();
+        console.log('장바구니 상품명:',cartfirstname);
+
+        //상품명/가격 으로 장바구니 상품 확인
+        expect(inventoryfirstname).toBe(cartfirstname);
+        console.log('>> 상품명 비교 장바구니 담기 확인')
+        expect(inventoryfirstprice).toBe(cartfirstprice);
+        console.log('>> 상품가격 비교 장바구니 담기 확인')
+
     });
 });
 
