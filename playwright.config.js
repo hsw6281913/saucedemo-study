@@ -82,3 +82,12 @@ export default defineConfig({
   // },
 });
 
+//로그인 한번 하면 기억 하게 해주는 것
+
+module.exports = defineConfig ({
+  globalSetup : require.resolve('./global_setup'),
+  use : {
+    storageState: 'storageState.json',
+    baseURL: 'https://www.saucedemo.com',
+  }
+});
