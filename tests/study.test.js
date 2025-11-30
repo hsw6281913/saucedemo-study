@@ -3,6 +3,9 @@
 
 
     test.describe('sacudemo 로그인&로그아웃',() =>{
+        //로그인 저장된 상태 사용안함
+        test.use ({storageState : undefined});
+
         //공통 메인 페이지 이동
         test.beforeEach(async ({page}) => {
             await page.goto('/');
