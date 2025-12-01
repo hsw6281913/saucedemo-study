@@ -33,8 +33,9 @@
 
     test.describe('로그아웃/장바구니 추가 기능 묶기',() => {
         test.beforeEach(async ({page}) => {
-            await loginstanduser(page);
+            await page.goto('/inventory.html');
             await expect(page).toHaveURL(/inventory\.html/);
+            await expect(page.locator('.title')).toHaveText('Products');
             console.log('>>로그인 성공')
         });
         // 로그아웃 확인
