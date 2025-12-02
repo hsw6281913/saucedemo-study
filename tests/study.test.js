@@ -1,11 +1,8 @@
-    import { test, expect } from '@playwright/test';
-    import { loginstanduser } from './helpers/auth';
+import { test, expect } from '@playwright/test';
+import { loginstanduser } from './helpers/auth';
+import { LoginPage } from './pages/LoginPage';
 
-
-    test.describe('sacudemo 로그인&로그아웃',() =>{
-        //로그인 저장된 상태 사용안함
-        test.use ({storageState : undefined});
-
+    test.describe('sacudemo 로그인&로그아웃',() => {
         //공통 메인 페이지 이동
         test.beforeEach(async ({page}) => {
             await page.goto('/');
@@ -13,8 +10,11 @@
         });
         
         //로그인 성공 테스트
-        test('로그인 성공', async ({page}) => {
-            await loginstanduser(page);
+        test('로그인 성공(LoginPage 사용', async ({page}) => {
+            const loginPage = new LoginPage(page);
+
+            await loginPage.goto();
+            await loginPage.login('standard_user','secret_sauce');
             await expect(page).toHaveURL(/inventory\.html/);
             await expect(page.getByText('Products')).toBeVisible();
         });
@@ -63,7 +63,8 @@
 
             //장바구니 담기
             await page.getByRole('button', { name: 'Add to cart'}).first().click();
-            await expect(page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
+            await expect(
+                page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
 
             //장바구니 숫자 1 업데이트 확인
             const cartBadge =  page.locator('.shopping_cart_badge');

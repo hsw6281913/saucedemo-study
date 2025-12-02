@@ -18,8 +18,8 @@ test.describe('saucedemo 자동화 상품1개 담고 로그아웃',()=>{
         console.log(firstprice);
 
         //첫번째 상품 장바구니에 담기
-        await page.getByRole('button',{name : 'add to cart'}).first().click();
-        await expect(page.getByRole('button',{name : 'Remove'})).first().toBeVisible();
+        await page.getByRole('button', { name: 'add to cart' }).first().click();
+        await expect(page.getByRole('button',{ name : 'Remove' }).first()).toBeVisible();
 
         //장바구니 페이지 이동
         await page.locator('.shopping_cart_link').click();
@@ -32,7 +32,7 @@ test.describe('saucedemo 자동화 상품1개 담고 로그아웃',()=>{
         //장바구니 상품비교 (상품명,가격)
         const cartName = await page.locator('.inventory_item_name').first().innerText();
         expect(cartName).toBe(firstname);
-        const cartPrice = await page.locator('.inventory-item-price').first().innerText();
+        const cartPrice = await page.locator('.inventory_item_price').first().innerText();
         expect(cartPrice).toBe(firstprice);
     })
 });

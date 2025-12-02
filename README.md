@@ -39,6 +39,7 @@ SauceDemo(https://www.saucedemo.com/) 사이트를 대상으로 **Playwright Tes
 │ ├─ helpers/
 │ │ └─ auth.js # 공통 로그인 함수(loginstanduser)
 │ └─ study.test.js # 로그인/로그아웃/장바구니 테스트
+│ └─ checkoute2e.test.js #장바구니 1개 담고/로그아웃 테스트
 ├─ playwright.config.js
 ├─ package.json
 ├─ package-lock.json
