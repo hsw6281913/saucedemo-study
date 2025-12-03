@@ -13,82 +13,99 @@ import { LoginPage } from './pages/LoginPage';
         test('로그인 성공(LoginPage 사용', async ({page}) => {
             const loginPage = new LoginPage(page);
 
-            await loginPage.goto();
-            await loginPage.login('standard_user','secret_sauce');
-            await expect(page).toHaveURL(/inventory\.html/);
+            await test.step('로그인 페이지 이동', async() => {
+                await loginPage.goto();    
+            });
+            await test.step('유효한 계정으로 로그인', async() => {
+                await loginPage.login('standard_user','secret_sauce');
+            });
+            await test.step('정상 로그인 확인', async() => {
+                await expect(page).toHaveURL(/inventory\.html/);
             await expect(page.getByText('Products')).toBeVisible();
+            console.log('>> 로그인 성공 확인 완료')
+            });
         });
 
         //로그인 실패 케이스 (비번 입력 실패)
         test('로그인 실패', async ({page}) => {
-            await page.getByPlaceholder('Username').fill('standard_user');
-            await page.getByPlaceholder('Password').fill('1111');
-            await page.getByRole('button', {name : 'Login'}).click();
-            await expect(page.getByText('Epic sadface: Username and password do not match any user in this service')).toBeVisible();
-            await expect(page).not.toHaveURL(/inventory\.html/);
-            console.log('>> 로그인 실패');
-        });
-    })
-
-
-    test.describe('로그아웃/장바구니 추가 기능 묶기',() => {
-        test.beforeEach(async ({page}) => {
-            await page.goto('/inventory.html');
-            await expect(page).toHaveURL(/inventory\.html/);
-            await expect(page.locator('.title')).toHaveText('Products');
-            console.log('>>로그인 성공')
-        });
-        // 로그아웃 확인
-        test('로그아웃 확인', async ({page}) => {
-            await page.getByRole('button', { name: 'Open Menu' }).click();
-            console.log('>>> 메뉴 선택 완료');
-            await page.getByText('Logout').click();
-            console.log('>>> 로그아웃 선택완료');
-            await expect(page).toHaveURL('https://www.saucedemo.com/');
-            console.log('>>> 로그아웃 성공');
-        });
-        // 장바구니 추가
-        test('장바구니 추가', async ({page}) => {
-            await page.getByRole('button', { name: 'Add to cart'}).first().click();
-            await expect(page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
-            console.log ('>> 장바구니 담기 성공');
-        });
-        
-        test ('장바구니 상품 업데이트 확인', async ({page}) => {
-            //장바구니 상품리스트 상품명/가격 저장
-            const inventoryfirstname = await page.locator('.inventory_item_name').first().innerText();
-            const inventoryfirstprice = await page.locator('.inventory_item_price').first().innerText();
-            console.log('상품명:',inventoryfirstname);
-            console.log('상품가격:',inventoryfirstprice);
-
-            //장바구니 담기
-            await page.getByRole('button', { name: 'Add to cart'}).first().click();
-            await expect(
-                page.getByRole('button',{name : 'Remove'}).first()).toBeVisible();
-
-            //장바구니 숫자 1 업데이트 확인
-            const cartBadge =  page.locator('.shopping_cart_badge');
-            await expect(cartBadge).toHaveText('1');
-            console.log('>> 장바구니 숫자 1 확인');
-
-            //장바구니 페이지 이동
-            const cartlink = page.locator('.shopping_cart_link');
-            await cartlink.click();
-            await expect(page).toHaveURL('https://www.saucedemo.com/cart.html');
-            console.log('>>> 장바구니 페이지 이동 확인')
+            await test.step('아이디/비밀번호(오류 입력)', async() => {
+                await page.getByPlaceholder('Username').fill('standard_user');
+                await page.getByPlaceholder('Password').fill('1111');
+            });
             
-            //장바구니 담은 상품명/가격 저장
-            const cartfirstname = await page.locator('.inventory_item_name').first().innerText();
-            const cartfirstprice = await page.locator('.inventory_item_price').first().innerText();
-            console.log('장바구니 상품명:',cartfirstname);
-
-            //상품명/가격 으로 장바구니 상품 확인
-            expect(inventoryfirstname).toBe(cartfirstname);
-            console.log('>> 상품명 비교 장바구니 담기 확인')
-            expect(inventoryfirstprice).toBe(cartfirstprice);
-            console.log('>> 상품가격 비교 장바구니 담기 확인')
-
+            await test.step('로그인 버튼 클릭', async() => {
+                await page.getByRole('button', {name : 'Login'}).click();
+            });
+            
+            await test.step('로그인 실패 확인', async() => {
+                await expect(page.getByText('Epic sadface: Username and password do not match any user in this service')).toBeVisible();
+                await expect(page).not.toHaveURL(/inventory\.html/);
+                console.log('>> 로그인 실패 확인 완료');
+            }); 
         });
     });
+
+
+    test.describe('로그아웃/장바구니/장바구니 검증', () => {
+  test.beforeEach(async ({ page }) => {
+    await test.step('사전조건: 로그인 완료 상태 만들기', async () => {
+      await page.goto('/');
+      await loginstanduser(page); // ✅ 여기서 로그인 보장
+      await expect(page).toHaveURL(/inventory\.html/);
+      await expect(page.locator('.title')).toHaveText('Products');
+    });
+  });
+
+  test('로그아웃 확인', async ({ page }) => {
+    await test.step('사이드 메뉴 열기', async () => {
+      await page.getByRole('button', { name: 'Open Menu' }).click();
+    });
+
+    await test.step('Logout 클릭', async () => {
+      await page.getByText('Logout').click();
+    });
+
+    await test.step('로그아웃 성공 확인(URL)', async () => {
+      await expect(page).toHaveURL('https://www.saucedemo.com/');
+    });
+  });
+
+  test('장바구니 추가', async ({ page }) => {
+    await test.step('첫 상품 Add to cart 클릭', async () => {
+      await page.getByRole('button', { name: 'Add to cart' }).first().click();
+    });
+
+    await test.step('Remove 버튼 표시로 담김 확인', async () => {
+      await expect(page.getByRole('button', { name: 'Remove' }).first()).toBeVisible();
+      await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    });
+  });
+
+  test('장바구니 상품 업데이트 확인(상품명/가격 일치)', async ({ page }) => {
+    let invName = '';
+    let invPrice = '';
+
+    await test.step('Inventory 첫 상품명/가격 저장', async () => {
+      invName = await page.locator('.inventory_item_name').first().innerText();
+      invPrice = await page.locator('.inventory_item_price').first().innerText();
+    });
+
+    await test.step('첫 상품 장바구니 담기', async () => {
+      await page.getByRole('button', { name: 'Add to cart' }).first().click();
+      await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+      await expect(page.getByRole('button', { name: 'Remove' }).first()).toBeVisible();
+    });
+
+    await test.step('장바구니 페이지로 이동', async () => {
+      await page.locator('.shopping_cart_link').click();
+      await expect(page).toHaveURL(/cart\.html/);
+    });
+
+    await test.step('장바구니 상품명/가격이 inventory와 동일한지 검증', async () => {
+      await expect(page.locator('.inventory_item_name').first()).toHaveText(invName);
+      await expect(page.locator('.inventory_item_price').first()).toHaveText(invPrice);
+    });
+  });
+});
 
         
