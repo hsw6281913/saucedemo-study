@@ -27,7 +27,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
 
   //global setup 넣기
-  globalSetup: './global-setup',
+  globalSetup: './global-setup.js',
 
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */

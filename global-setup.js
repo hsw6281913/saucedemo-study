@@ -8,9 +8,14 @@ module.exports = async () => {
     await page.goto('https://www.saucedemo.com');
     await page.getByPlaceholder('Username').fill('standard_user');
     await page.getByPlaceholder('Password').fill('secret_sauce');
-    await page.getByRole('button', { name: 'Login' }).click();
+
+    await Promise.all([
+        page.waitForURL(/inventory\.html/),
+        page.getByRole('button', { name: 'Login' }).click(),
+    ]);
+    
     //URL 접속 대기
-    await page.waitForURL(/inventory\.html/);
+    await 
 
     //로그인 상태 저장
     await context.storageState({ path : 'storageState.json'});

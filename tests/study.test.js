@@ -2,55 +2,59 @@ import { test, expect } from '@playwright/test';
 import { loginstanduser } from './helpers/auth';
 import { LoginPage } from './pages/LoginPage';
 
-    test.describe('sacudemo 로그인&로그아웃',() => {
-        //공통 메인 페이지 이동
-        test.beforeEach(async ({page}) => {
-            await page.goto('/');
-            console.log('>>> 메인 페이지 이동')
-        });
-        
-        //로그인 성공 테스트
-        test('로그인 성공(LoginPage 사용', async ({page}) => {
-            const loginPage = new LoginPage(page);
+test.describe('sacudemo 로그인&로그아웃', () => {
+  // 공통 메인 페이지 이동
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    console.log('>>> 메인 페이지 이동');
+  });
 
-            await test.step('로그인 페이지 이동', async() => {
-                await loginPage.goto();    
-            });
-            await test.step('유효한 계정으로 로그인', async() => {
-                await loginPage.login('standard_user','secret_sauce');
-            });
-            await test.step('정상 로그인 확인', async() => {
-                await expect(page).toHaveURL(/inventory\.html/);
-            await expect(page.getByText('Products')).toBeVisible();
-            console.log('>> 로그인 성공 확인 완료')
-            });
-        });
+  // 로그인 성공 테스트
+  test('로그인 성공(LoginPage 사용)', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-        //로그인 실패 케이스 (비번 입력 실패)
-        test('로그인 실패', async ({page}) => {
-            await test.step('아이디/비밀번호(오류 입력)', async() => {
-                await page.getByPlaceholder('Username').fill('standard_user');
-                await page.getByPlaceholder('Password').fill('1111');
-            });
-            
-            await test.step('로그인 버튼 클릭', async() => {
-                await page.getByRole('button', {name : 'Login'}).click();
-            });
-            
-            await test.step('로그인 실패 확인', async() => {
-                await expect(page.getByText('Epic sadface: Username and password do not match any user in this service')).toBeVisible();
-                await expect(page).not.toHaveURL(/inventory\.html/);
-                console.log('>> 로그인 실패 확인 완료');
-            }); 
-        });
+    await test.step('로그인 페이지 이동', async () => {
+      await loginPage.goto();
     });
 
+    await test.step('유효한 계정으로 로그인', async () => {
+      await loginPage.login('standard_user', 'secret_sauce');
+    });
 
-    test.describe('로그아웃/장바구니/장바구니 검증', () => {
+    await test.step('정상 로그인 확인', async () => {
+      await expect(page).toHaveURL(/inventory\.html/);
+      await expect(page.getByText('Products')).toBeVisible();
+      console.log('>> 로그인 성공 확인 완료');
+    });
+  });
+
+  // 로그인 실패 케이스 (비번 입력 실패)
+  test('로그인 실패', async ({ page }) => {
+    await test.step('아이디/비밀번호(오류 입력)', async () => {
+      await page.getByPlaceholder('Username').fill('standard_user');
+      await page.getByPlaceholder('Password').fill('1111');
+    });
+
+    await test.step('로그인 버튼 클릭', async () => {
+      await page.getByRole('button', { name: 'Login' }).click();
+    });
+
+    await test.step('로그인 실패 확인', async () => {
+      await expect(
+        page.getByText('Epic sadface: Username and password do not match any user in this service')
+      ).toBeVisible();
+      await expect(page).not.toHaveURL(/inventory\.html/);
+      console.log('>> 로그인 실패 확인 완료');
+    });
+  });
+});
+
+test.describe('로그아웃/장바구니/장바구니 검증', () => {
+  test.describe.configure({ mode: 'serial'});
   test.beforeEach(async ({ page }) => {
     await test.step('사전조건: 로그인 완료 상태 만들기', async () => {
       await page.goto('/');
-      await loginstanduser(page); // ✅ 여기서 로그인 보장
+      await loginstanduser(page);
       await expect(page).toHaveURL(/inventory\.html/);
       await expect(page.locator('.title')).toHaveText('Products');
     });
@@ -86,6 +90,7 @@ import { LoginPage } from './pages/LoginPage';
     let invPrice = '';
 
     await test.step('Inventory 첫 상품명/가격 저장', async () => {
+      console.log('NOW URL', page.url());
       invName = await page.locator('.inventory_item_name').first().innerText();
       invPrice = await page.locator('.inventory_item_price').first().innerText();
     });
@@ -106,6 +111,16 @@ import { LoginPage } from './pages/LoginPage';
       await expect(page.locator('.inventory_item_price').first()).toHaveText(invPrice);
     });
   });
-});
 
-        
+  test('정보 입력 화면 노출 및 구매 완료', async ({ page }) => {
+    console.log('NOW URL', page.url());
+
+    await test.step('장바구니 페이지 이동 및 정보 입력 화면 진입', async () => {
+      await page.locator('.shopping_cart_link').click();
+      await expect(page).toHaveURL(/cart\.html/);
+
+      await page.getByRole('button', { name: 'Checkout' }).click();
+      await expect(page).toHaveURL(/checkout-step-one\.html/); // ✅ 이거 정규식으로
+    });
+  });
+});
